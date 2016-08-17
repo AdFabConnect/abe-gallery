@@ -24,7 +24,6 @@ ImageJson.prototype.create = function () {
   var images = this.abe.FileParser.getFiles(imageUrl, true, 10);
   var imageList = [];
   images.forEach(function (image) {
-    console.log(image.cleanFilePath)
     try{
       var dimensions = sizeOf(this.abe.fileUtils.concatPath(config.root, config.publish.url, image.cleanFilePath));
       imageList.push({
