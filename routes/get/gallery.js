@@ -6,7 +6,7 @@ var SmartImage = require('../../modules/SmartImage');
 var ImageJson = require('../../modules/ImageJson');
 
 var route = function route(req, res, next, abe) {
-	var jsonFile = abe.fileUtils.concatPath(abe.config.root, abe.config.plugins.url, '/abe-gallery/images.json');
+	var jsonFile = abe.fileUtils.concatPath(abe.config.root, abe.config.plugins.url, '/abe-gallerygallery/images.json');
   var imageList = [];
   var images = [];
   var result = [];
@@ -40,7 +40,9 @@ var route = function route(req, res, next, abe) {
 		  var thumbsFolderPath = thumbsPath.split('/');
 		  thumbsFolderPath.pop();
 		  thumbsFolderPath = thumbsFolderPath.join('/');
-    	smartImage.create(realPath, thumbsPath, 200, null);
+    	setTimeout(function () {
+    		smartImage.create(realPath, thumbsPath, 200, null);
+    	}, 2000)
 		break;
 	}
 

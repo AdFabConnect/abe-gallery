@@ -1,6 +1,6 @@
 var SmartImage = require('./SmartImage');
 var sizeOf = require('image-size');
-
+var fs = require('fs');
 var jsonFile = '../images.json';
 var jsonCache = [];
 
@@ -9,18 +9,33 @@ function ImageJson (abe) {
   jsonFile = abe.fileUtils.concatPath(abe.config.root, abe.config.plugins.url, '/abe-gallery/images.json');
 };
 
+function fileExists(filePath) {
+  try {
+    return fs.statSync(filePath).isFile();
+  }
+  catch (err) {
+    return false;
+  }
+}
+
 ImageJson.prototype.create = function () {
   var config = this.abe.config;
   var imageUrl = this.abe.fileUtils.concatPath(config.root, config.publish.url, config.upload.image);
   var images = this.abe.FileParser.getFiles(imageUrl, true, 10);
   var imageList = [];
   images.forEach(function (image) {
-    var dimensions = sizeOf(this.abe.fileUtils.concatPath(config.root, config.publish.url, image.cleanFilePath));
-    imageList.push({
-      height: dimensions.height,
-      width: dimensions.width,
-      path: '/' + image.cleanFilePath.replace(/^\//, '')
-    });
+    console.log(image.cleanFilePath)
+    try{
+      var dimensions = sizeOf(this.abe.fileUtils.concatPath(config.root, config.publish.url, image.cleanFilePath));
+      imageList.push({
+        height: dimensions.height,
+        width: dimensions.width,
+        path: '/' + image.cleanFilePath.replace(/^\//, '')
+      });
+    }
+    catch(e){
+      console.log(e)
+    }
   }.bind(this));
 
   this.save(imageList);
@@ -30,8 +45,24 @@ ImageJson.prototype.create = function () {
 
 ImageJson.prototype.addImage = function (path) {
   var imageList = this.get();
-  console.log(this.abe.config.root, this.abe.config.publish.url, path);
-  var dimensions = sizeOf(this.abe.fileUtils.concatPath(this.abe.config.root, this.abe.config.publish.url, path));
+  var path = this.abe.fileUtils.concatPath(this.abe.config.root, this.abe.config.publish.url, path);
+
+  if(!fileExists(path)) {
+    setTimeout(function () {
+      this.addImage(path);
+    }.bind(this), 200);
+    return;
+  }
+  var dimensions;
+  try{
+    dimensions = sizeOf(path);
+  }
+  catch(e){
+    dimensions = {
+      height: 0,
+      width: 0
+    }
+  }
   imageList.unshift({
     height: dimensions.height,
     width: dimensions.width,

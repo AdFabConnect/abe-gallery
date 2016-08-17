@@ -37,16 +37,28 @@ var ThumbnailGrid = function (selector, selectorImage, popup) {
 		});
 	}
 
+	var _inputChange = function (e) {
+		currentInput = e.target.parentNode.querySelector('input[type="text"]');
+	}
+
 	if(btnsDisplayGallery){
 		Array.prototype.forEach.call(btnsDisplayGallery, function(btnDisplayGallery) {
-			btnDisplayGallery.addEventListener('click', function (e) {
-				currentInput = e.target.parentNode.querySelector('input[type="text"]');
-			});
+			btnDisplayGallery.addEventListener('click', _inputChange, false);
 		});
 	}
 
+	window.abe.blocks.onNewBlock(function() {
+		btnsDisplayGallery = document.querySelectorAll('.display-gallery');
+		if(btnsDisplayGallery){
+			Array.prototype.forEach.call(btnsDisplayGallery, function(btnDisplayGallery) {
+				btnDisplayGallery.removeEventListener('click', _inputChange, false);
+				btnDisplayGallery.addEventListener('click', _inputChange, false);
+			});
+		}
+  }.bind(this))
+
 	btnFlush.addEventListener('click', function (e) {
-		var url = 'http://' + window.location.host + '/plugin/abe-gallery/gallery?action=flush';
+		var url = 'http://' + window.location.host + '/abe/plugin/gallery/gallery?action=flush';
 		var oReq = new XMLHttpRequest();
 		oReq.onreadystatechange = function () {
 			if (oReq.readyState != 4 || oReq.status != 200) return;
@@ -105,6 +117,10 @@ var ThumbnailGrid = function (selector, selectorImage, popup) {
     xhr.onerror = function(e) { console.log('An error occurred while submitting the form. Maybe your file is too big'); }
     xhr.onload = function() {
       var resp = JSON.parse(xhr.responseText);
+      if(resp.error){
+        alert(resp.response);
+        return;
+      }
       var img = document.createElement('div');
       img.classList.add('image-item');
       img.innerHTML = '<img src="' + resp.filePath + '">';
@@ -113,7 +129,7 @@ var ThumbnailGrid = function (selector, selectorImage, popup) {
 			}
       images = document.querySelectorAll(selectorImage);
 
-			var url = 'http://' + window.location.host + '/plugin/abe-gallery/gallery?action=write&fileName=' + resp.filePath;
+			var url = 'http://' + window.location.host + '/abe/plugin/gallery/gallery?action=write&fileName=' + resp.filePath;
 			var oReq = new XMLHttpRequest();
 			oReq.onreadystatechange = function () {
 				if (oReq.readyState != 4 || oReq.status != 200) return;
@@ -152,5 +168,3 @@ var ThumbnailGrid = function (selector, selectorImage, popup) {
 };
 
 new ThumbnailGrid('.image-list', '.image-item', '#thumbnail-modal');
-
-

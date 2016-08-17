@@ -1,5 +1,6 @@
 'use strict';
 
+var fs = require('fs');
 var sizeOf = require('image-size');
 var execPromise = require('child-process-promise');
 var SmartImage = require('../modules/SmartImage');
@@ -7,6 +8,7 @@ var ImageJson = require('../modules/ImageJson');
 var imageList = [];
 var images;
 var abe;
+var keys = [];
 
 var hooks = {
   afterVariables: function(EditorVariables, abe){
@@ -26,8 +28,57 @@ var hooks = {
     return EditorVariables;
   },
   afterAbeAttributes: function afterAbeAttributes(obj, str, json, abe) {
-    if(abe.getAttr(str, 'thumbs') !== '') obj.thumbs = abe.getAttr(str, 'thumbs');
+    if(abe.getAttr(str, 'thumbs') !== '') {
+      var link = json.abe_meta.link;
+      if(typeof keys[link] === 'undefined' || keys[link] === null) keys[link] = [];
+      keys[link][obj.key] = abe.getAttr(str, 'thumbs').split(',');
+      obj.thumbs = abe.getAttr(str, 'thumbs');
+    }
     return obj;
+  },
+  beforeSave: function(obj, abe) {
+    var link = obj.json.content.abe_meta.link;
+    if(typeof keys[link] !== 'undefined' && keys[link] !== null){
+      for(var prop in keys[link]){
+        var k = keys[link];
+        if(prop.indexOf('.') > -1){
+          var p0 = prop.split('.')[0]
+          var p1 = prop.split('.')[1]
+          k = keys[link][p0];
+          var index = 0;
+          if(obj.json.content[p0]){
+            obj.json.content[p0].forEach(function (item) {
+              if(typeof item[p1] !== 'undefined' && item[p1] !== null && item[p1] !== ''){
+                keys[link][prop].forEach(function (key) {
+                  var path = item[p1].replace(/(\.(gif|jpg|jpeg|png))/, '_' + key + '$1');
+                  try{
+                    var sfStat = fs.statSync(abe.fileUtils.concatPath(abe.config.root, abe.config.publish.url, path));
+                    obj.json.content[p0][index++][p1 + '_' + key] = path;
+                  }
+                  catch(e){
+                    delete obj.json.content[p0][index++][p1 + '_' + key];
+                  }
+                });
+              }
+            });
+          }
+        }
+        else if(obj.json.content[prop].indexOf('http://') < 0){
+          var img = obj.json.content[prop].split('.');
+          keys[link][prop].forEach(function (key) {
+            var path = obj.json.content[prop].replace(/(\.(gif|jpg|jpeg|png))/, '_' + key + '$1');
+            try{
+              var sfStat = fs.statSync(abe.fileUtils.concatPath(abe.config.root, abe.config.publish.url, path));
+              obj.json.content[prop + '_' + key] = path;
+            }
+            catch(e){
+              delete obj.json.content[prop + '_' + key];
+            }
+          });
+        }
+      }
+    }
+    return obj
   },
   afterEditorInput: function(htmlString, params, abe) {
     if(htmlString.indexOf('img-upload') > -1){
@@ -46,13 +97,8 @@ var hooks = {
         sizeThumbs += '" ';
       }
       htmlString = htmlString.replace(/(type=[\"|\'']file[\"|\''])/g, '$1' + sizeThumbs);
-      htmlString = htmlString.replace(
-        /(glyphicon-upload(\r|\t|\n|.)*?<\/span>(\r|\t|\n|.)*?<\/span>(\r|\t|\n|.)*?<\/div>)/g,
-        '$1<span class="glyphicon glyphicon-picture display-gallery" aria-hidden="true" data-toggle="modal" data-target="#thumbnail-modal"></span>' +
-        inputThumbs
-      );
     }
-    
+
     return htmlString
   },
   beforeExpress: function (port, abe) {
@@ -75,6 +121,7 @@ var hooks = {
     var smartImage = new SmartImage(abe);
     var realPath = abe.fileUtils.concatPath(abe.config.root, abe.config.publish.url, resp.filePath);
     var thumbsPath = abe.fileUtils.concatPath(abe.config.root, abe.config.publish.url, 'thumbs', resp.filePath);
+    var error = [];
     if(/data-size=[\"|\''](.*?)[\"|\'']/.test(req.query.input)){
       var arraySize = req.query.input.match(/data-size=[\"|\''](.*?)[\"|\'']/)[1].split(',');
       arraySize.forEach(function (size) {
@@ -84,10 +131,28 @@ var hooks = {
         resizedImage[resizedImage.length - 1] = resizedImage[resizedImage.length - 1] + "_" + size;
         resizedImage.push(ext)
         resizedImage = resizedImage.join('.');
-        smartImage.create(realPath, resizedImage, dimensions[0], dimensions[1]);
+        smartImage.create(realPath, resizedImage, dimensions[0], dimensions[1], function (res) {
+          console.log(res)
+          if(res.error) error.push(res);
+        });
       });
     }
-    smartImage.create(realPath, thumbsPath, 200, null);
+
+    fs.stat(realPath, function(err, stat) {
+      if(err == null) {
+        smartImage.create(realPath, thumbsPath, 200, null, function (res) {
+          if(res.error) error.push(res);
+        });
+      } else if(err.code == 'ENOENT') {
+        // file does not exist
+        console.log("file does not exist")
+      } else {
+        console.log('Some other error: ', err.code);
+      }
+    });
+
+    if(error.length > 0) resp.error = error;
+
     imageJson.addImage(resp.filePath);
     resp.thumbsPath = thumbsPath;
     return resp
