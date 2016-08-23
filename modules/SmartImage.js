@@ -14,7 +14,7 @@ function fileExists(filePath) {
 
 function SmartImage (abe) {
 	this.abe = abe;
-	this.smatCropPath = abe.fileUtils.concatPath(abe.config.root, '/plugins/gallery/node_modules/smartcrop-cli/smartcrop-cli.js');
+	this.smatCropPath = abe.fileUtils.concatPath(abe.config.root, '/plugins/abe-gallery/node_modules/smartcrop-cli/smartcrop-cli.js');
 };
 
 SmartImage.prototype.create = function (src, dist, width, height, callBack) {

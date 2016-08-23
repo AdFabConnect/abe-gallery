@@ -58,7 +58,7 @@ var ThumbnailGrid = function (selector, selectorImage, popup) {
   }.bind(this))
 
 	btnFlush.addEventListener('click', function (e) {
-		var url = 'http://' + window.location.host + '/abe/plugin/gallery/gallery?action=flush';
+		var url = 'http://' + window.location.host + '/abe/plugin/abe-gallery/gallery?action=flush';
 		var oReq = new XMLHttpRequest();
 		oReq.onreadystatechange = function () {
 			if (oReq.readyState != 4 || oReq.status != 200) return;
@@ -129,7 +129,7 @@ var ThumbnailGrid = function (selector, selectorImage, popup) {
 			}
       images = document.querySelectorAll(selectorImage);
 
-			var url = 'http://' + window.location.host + '/abe/plugin/gallery/gallery?action=write&fileName=' + resp.filePath;
+			var url = 'http://' + window.location.host + '/abe/plugin/abe-gallery/gallery?action=write&fileName=' + resp.filePath;
 			var oReq = new XMLHttpRequest();
 			oReq.onreadystatechange = function () {
 				if (oReq.readyState != 4 || oReq.status != 200) return;
