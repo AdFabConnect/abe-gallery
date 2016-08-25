@@ -132,27 +132,13 @@ var hooks = {
         resizedImage.push(ext)
         resizedImage = resizedImage.join('.');
         smartImage.create(realPath, resizedImage, dimensions[0], dimensions[1], function (res) {
-          console.log(res)
+          if(res.error) console.log("smartImage ERROR : ", res.error)
           if(res.error) error.push(res);
         });
       });
     }
 
-    fs.stat(realPath, function(err, stat) {
-      if(err == null) {
-        smartImage.create(realPath, thumbsPath, 200, null, function (res) {
-          if(res.error) error.push(res);
-        });
-      } else if(err.code == 'ENOENT') {
-        // file does not exist
-        console.log("file does not exist")
-      } else {
-        console.log('Some other error: ', err.code);
-      }
-    });
-
     if(error.length > 0) resp.error = error;
-
     imageJson.addImage(resp.filePath);
     resp.thumbsPath = thumbsPath;
     return resp
