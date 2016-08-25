@@ -10,7 +10,7 @@ abe add https://github.com/AdFabConnect/abe-gallery.git
 
 OS	Command
 OS X	brew install pkg-config cairo libpng jpeg giflib
-Ubuntu	sudo apt-get install libcairo2-dev libjpeg8-dev libpango1.0-dev libgif-dev build-essential g++
+Ubuntu	sudo apt-get install graphicsmagick imagemagick libcairo2-dev libjpeg8-dev libpango1.0-dev libgif-dev build-essential g++
 Fedora	sudo yum install cairo cairo-devel cairomm-devel libjpeg-turbo-devel pango pango-devel pangomm pangomm-devel giflib-devel
 Solaris	pkgin install cairo pkg-config xproto renderproto kbproto xextproto
 Windows	https://github.com/Automattic/node-canvas/wiki/Installation---Windows
