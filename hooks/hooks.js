@@ -40,41 +40,47 @@ var hooks = {
     var link = obj.json.content.abe_meta.link;
     if(typeof keys[link] !== 'undefined' && keys[link] !== null){
       for(var prop in keys[link]){
-        var k = keys[link];
-        if(prop.indexOf('.') > -1){
-          var p0 = prop.split('.')[0]
-          var p1 = prop.split('.')[1]
-          k = keys[link][p0];
-          var index = 0;
-          if(obj.json.content[p0]){
-            obj.json.content[p0].forEach(function (item) {
-              if(typeof item[p1] !== 'undefined' && item[p1] !== null && item[p1] !== ''){
-                keys[link][prop].forEach(function (key) {
-                  var path = item[p1].replace(/(\.(gif|jpg|jpeg|png))/, '_' + key + '$1');
-                  try{
-                    var sfStat = fs.statSync(abe.fileUtils.concatPath(abe.config.root, abe.config.publish.url, path));
-                    obj.json.content[p0][index++][p1 + '_' + key] = path;
-                  }
-                  catch(e){
-                    delete obj.json.content[p0][index++][p1 + '_' + key];
-                  }
-                });
+        try{
+          var k = keys[link];
+          if(prop.indexOf('.') > -1){
+            var p0 = prop.split('.')[0]
+            var p1 = prop.split('.')[1]
+            k = keys[link][p0];
+            var index = 0;
+            if(p0 in obj.json.content){
+              obj.json.content[p0].forEach(function (item) {
+                if(typeof item[p1] !== 'undefined' && item[p1] !== null && item[p1] !== ''){
+                  keys[link][prop].forEach(function (key) {
+                    var path = item[p1].replace(/(\.(gif|jpg|jpeg|png))/, '_' + key + '$1');
+                    try{
+                      var sfStat = fs.statSync(abe.fileUtils.concatPath(abe.config.root, abe.config.publish.url, path));
+                      obj.json.content[p0][index++][p1 + '_' + key] = path;
+                    }
+                    catch(e){
+                      delete obj.json.content[p0][index++][p1 + '_' + key];
+                    }
+                  });
+                }
+              });
+            }
+          }
+          else if((prop in obj.json.content) && obj.json.content[prop].indexOf('http://') < 0){
+            var img = obj.json.content[prop].split('.');
+            keys[link][prop].forEach(function (key) {
+              var path = obj.json.content[prop].replace(/(\.(gif|jpg|jpeg|png))/, '_' + key + '$1');
+              try{
+                var sfStat = fs.statSync(abe.fileUtils.concatPath(abe.config.root, abe.config.publish.url, path));
+                obj.json.content[prop + '_' + key] = path;
+              }
+              catch(e){
+                delete obj.json.content[prop + '_' + key];
               }
             });
           }
-        }
-        else if(obj.json.content[prop].indexOf('http://') < 0){
-          var img = obj.json.content[prop].split('.');
-          keys[link][prop].forEach(function (key) {
-            var path = obj.json.content[prop].replace(/(\.(gif|jpg|jpeg|png))/, '_' + key + '$1');
-            try{
-              var sfStat = fs.statSync(abe.fileUtils.concatPath(abe.config.root, abe.config.publish.url, path));
-              obj.json.content[prop + '_' + key] = path;
-            }
-            catch(e){
-              delete obj.json.content[prop + '_' + key];
-            }
-          });
+        } catch(e) {
+          console.log('error on Gallery plugin : hooks.js beforeSave, prop:'+prop)
+          //console.log(obj.json.content)
+          console.log(keys[link])
         }
       }
     }

@@ -12,8 +12,12 @@ SmartImage.prototype.create = function (src, dist, width, height, callBack) {
   thumbsFolderPath = thumbsFolderPath.split('/');
   thumbsFolderPath.pop();
   thumbsFolderPath = thumbsFolderPath.join('/');
-  var cmd = exec.execSync('node ' + this.smatCropPath + ' --width ' + width + ' --height ' + height + ' ' + src + ' ' + dist);
-  callBack(cmd)
+  try{
+  	var cmd = exec.execSync('node ' + this.smatCropPath + ' --width ' + width + ' --height ' + height + ' ' + src + ' ' + dist);
+  	callBack(cmd)
+	} catch(e){
+		console.log(e)
+	}
 };
 
 SmartImage.prototype.createList = function (list, key, from, to, width, height) {
