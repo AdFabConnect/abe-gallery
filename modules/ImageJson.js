@@ -100,7 +100,11 @@ ImageJson.prototype.flush = function (imageList) {
         this.abe.fileUtils.concatPath(this.abe.config.root, this.abe.config.publish.url, imgUrl),
         this.abe.fileUtils.concatPath(this.abe.config.root, this.abe.config.publish.url, 'thumbs', imgUrl),
         200,
-        null
+        null, 
+        function (res) {
+          if(res.error) console.log("smartImage ERROR : ", res.error)
+          if(res.error) error.push(res);
+        }
       );
     }
   }.bind(this));

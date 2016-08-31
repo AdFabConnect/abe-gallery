@@ -41,7 +41,10 @@ var route = function route(req, res, next, abe) {
 		  thumbsFolderPath.pop();
 		  thumbsFolderPath = thumbsFolderPath.join('/');
     	setTimeout(function () {
-    		smartImage.create(realPath, thumbsPath, 200, null);
+    		smartImage.create(realPath, thumbsPath, 200, null, function (res) {
+          if(res.error) console.log("smartImage ERROR : ", res.error)
+          if(res.error) error.push(res);
+        });
     	}, 2000)
 		break;
 	}
