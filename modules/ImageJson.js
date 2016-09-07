@@ -25,7 +25,8 @@ ImageJson.prototype.create = function () {
   var imageList = [];
   images.forEach(function (image) {
     try{
-      var dimensions = sizeOf(this.abe.fileUtils.concatPath(config.root, config.publish.url, image.cleanFilePath));
+      var path = this.abe.fileUtils.concatPath(config.root, config.publish.url, image.cleanFilePath)
+      var dimensions = sizeOf(path);
       imageList.push({
         height: dimensions.height,
         width: dimensions.width,
@@ -33,7 +34,22 @@ ImageJson.prototype.create = function () {
       });
     }
     catch(e){
-      console.log(e)
+      try{
+        var stats = fs.statSync(path);
+        //image-size doesn't like images with 0ko
+        // If I find one such image, I delete it
+        if(stats["size"] === 0) {
+          fs.unlinkSync(path);
+        } else {
+          console.log(e)
+          console.log(path)
+        }
+      }
+      catch(err) {
+        console.log(path)
+        console.log(e)
+        console.log(err)
+      }
     }
   }.bind(this));
 

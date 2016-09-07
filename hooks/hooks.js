@@ -12,19 +12,22 @@ var keys = [];
 
 var hooks = {
   afterVariables: function(EditorVariables, abe){
-    var imageJson = new ImageJson(abe);
-    var smartImage = new SmartImage(abe);
-    var exist = imageJson.exist();
-    var imageList = imageJson.get();
-    EditorVariables.imageList = imageList;
-    if(!exist) smartImage.createList(
-      imageList,
-      'path',
-      abe.fileUtils.concatPath(abe.config.root, abe.config.publish.url),
-      abe.fileUtils.concatPath(abe.config.root, abe.config.publish.url, 'thumbs'),
-      200,
-      null
-    );
+    if(abe.config.gallery){
+      var imageJson = new ImageJson(abe);
+      var smartImage = new SmartImage(abe);
+      var exist = imageJson.exist();
+      var imageList = imageJson.get();
+      EditorVariables.imageList = imageList;
+      if(!exist) smartImage.createList(
+        imageList,
+        'path',
+        abe.fileUtils.concatPath(abe.config.root, abe.config.publish.url),
+        abe.fileUtils.concatPath(abe.config.root, abe.config.publish.url, 'thumbs'),
+        200,
+        null
+      );
+    }
+
     return EditorVariables;
   },
   afterAbeAttributes: function afterAbeAttributes(obj, str, json, abe) {
@@ -108,17 +111,20 @@ var hooks = {
     return htmlString
   },
   beforeExpress: function (port, abe) {
-    var imageJson = new ImageJson(abe);
-    var smartImage = new SmartImage(abe);
-    if(!imageJson.exist()) {
-      smartImage.createList(
-        imageJson.create(),
-        'path',
-        abe.fileUtils.concatPath(abe.config.root, abe.config.publish.url),
-        abe.fileUtils.concatPath(abe.config.root, abe.config.publish.url, 'thumbs'),
-        200,
-        null
-      );
+    // this is too time consuming. to be refactored
+    if(abe.config.gallery){
+      var imageJson = new ImageJson(abe);
+      var smartImage = new SmartImage(abe);
+      if(!imageJson.exist()) {
+        smartImage.createList(
+          imageJson.create(),
+          'path',
+          abe.fileUtils.concatPath(abe.config.root, abe.config.publish.url),
+          abe.fileUtils.concatPath(abe.config.root, abe.config.publish.url, 'thumbs'),
+          200,
+          null
+        );
+      }
     }
     return port;
   },
