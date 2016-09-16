@@ -6,7 +6,7 @@ var jsonCache = [];
 var path = require('path');
 
 function ImageJson (abe) {
-	this.abe = abe;
+  this.abe = abe;
   jsonFile = path.join(abe.config.root, abe.config.plugins.url, '/abe-gallery/images.json');
 };
 
@@ -61,7 +61,7 @@ ImageJson.prototype.create = function () {
 
 ImageJson.prototype.addImage = function (pathImg) {
   var imageList = this.get();
-  var pathAdd = path.join(this.abe.config.root, this.abe.config.publish.url, pathAdd);
+  var pathAdd = path.join(this.abe.config.root, this.abe.config.publish.url, pathImg);
 
   if(!fileExists(pathAdd)) {
     setTimeout(function () {
