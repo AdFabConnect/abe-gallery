@@ -1,45 +1,30 @@
-var execPromise = require('child-process-promise');
+var exec = require('child_process');
 var sizeOf = require('image-size');
 var path = require('path');
 
 function SmartImage (abe) {
 	this.abe = abe;
-	this.smatCropPath = path.join(abe.config.root, '/plugins/abe-gallery/node_modules/smartcrop-cli/smartcrop-cli.js');
+	this.smartCropPath = abe.fileUtils.concatPath(abe.config.root, abe.config.plugins.url, 'abe-gallery/node_modules/smartcrop-cli/smartcrop-cli.js');
 };
 
-SmartImage.prototype.create = function (src, dist, width, height) {
-	var height = (typeof height !== 'undefined' && height !== null) ? height : (function () {
-		var dimensions = sizeOf(src);
-  	return parseInt(dimensions.height * width / dimensions.width);
-	})();
-	var thumbsFolderPath = dist;
-  thumbsFolderPath = thumbsFolderPath.split('/');
-  thumbsFolderPath.pop();
-  thumbsFolderPath = thumbsFolderPath.join('/');
+SmartImage.prototype.create = function (src, dist, width, height, callBack) {
+	var bufferSize = (this.abe.config && this.abe.config.galleryBufferSize) ? this.abe.config.galleryBufferSize : 1024 * 1000;
+	var thumbsFolderPath = dist.split("/").slice(0, -1).join("/");
 
-  if(!this.abe.fileUtils.isFile(dist)){
-  	console.log('create : ' + dist)
-	  this.abe.folderUtils.createFolder(thumbsFolderPath);
-	  execPromise.exec('node ' + this.smatCropPath + ' --width ' + width + ' --height ' + height + ' ' + src + ' ' + dist)
-	    .then(function (result) {
-	      var stdout = result.stdout;
-	      var stderr = result.stderr;
-	      // if(stdout) console.log('stdout: ', stdout);
-	      // if(stderr) console.log('stderr: ', stderr);
-	    })
-	    .fail(function (err) {
-	      console.error('ERROR: ', err);
-	    })
-	    .progress(function (childProcess) {
-	      // console.log('childProcess.pid: ', childProcess.pid);
-	    });
-  }
+  try{
+  	var cmd = exec.execSync('node ' + this.smartCropPath + ' --width ' + width + ' --height ' + height + ' ' + src + ' ' + dist);
+  	callBack(cmd)
+	} catch(e){
+		console.log(e)
+	}
 };
 
 SmartImage.prototype.createList = function (list, key, from, to, width, height) {
 	list.forEach(function (imageObj) {
-    var pathList = '/' + imageObj[key].replace(/^\//, '');
-    this.create(path.join(from, pathList), path.join(to, pathList), width, height);
+    var path = '/' + imageObj[key].replace(/^\//, '');
+    this.create(this.abe.fileUtils.concatPath(from, path), this.abe.fileUtils.concatPath(to, path), width, height, function (res) {
+      if(res.error) console.log("smartImage ERROR : ", res.error);
+    });
   }.bind(this));
 };
 
