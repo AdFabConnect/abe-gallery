@@ -2,7 +2,6 @@
 
 var fs = require('fs');
 var sizeOf = require('image-size');
-var execPromise = require('child-process-promise');
 var SmartImage = require('../modules/SmartImage');
 var ImageJson = require('../modules/ImageJson');
 var imageList = [];
