@@ -1,5 +1,6 @@
 'use strict';
 
+var path = require('path');
 var sizeOf = require('image-size');
 var execPromise = require('child-process-promise');
 var SmartImage = require('../modules/SmartImage');
@@ -18,8 +19,8 @@ var hooks = {
     if(!exist) smartImage.createList(
       imageList,
       'path',
-      abe.fileUtils.concatPath(abe.config.root, abe.config.publish.url),
-      abe.fileUtils.concatPath(abe.config.root, abe.config.publish.url, 'thumbs'),
+      path.join(abe.config.root, abe.config.publish.url),
+      path.join(abe.config.root, abe.config.publish.url, 'thumbs'),
       200,
       null
     );
@@ -62,8 +63,8 @@ var hooks = {
       smartImage.createList(
         imageJson.create(),
         'path',
-        abe.fileUtils.concatPath(abe.config.root, abe.config.publish.url),
-        abe.fileUtils.concatPath(abe.config.root, abe.config.publish.url, 'thumbs'),
+        path.join(abe.config.root, abe.config.publish.url),
+        path.join(abe.config.root, abe.config.publish.url, 'thumbs'),
         200,
         null
       );
@@ -73,8 +74,8 @@ var hooks = {
   afterSaveImage: (resp, req, abe) => {
     var imageJson = new ImageJson(abe);
     var smartImage = new SmartImage(abe);
-    var realPath = abe.fileUtils.concatPath(abe.config.root, abe.config.publish.url, resp.filePath);
-    var thumbsPath = abe.fileUtils.concatPath(abe.config.root, abe.config.publish.url, 'thumbs', resp.filePath);
+    var realPath = path.join(abe.config.root, abe.config.publish.url, resp.filePath);
+    var thumbsPath = path.join(abe.config.root, abe.config.publish.url, 'thumbs', resp.filePath);
     if(/data-size=[\"|\''](.*?)[\"|\'']/.test(req.query.input)){
       var arraySize = req.query.input.match(/data-size=[\"|\''](.*?)[\"|\'']/)[1].split(',');
       arraySize.forEach(function (size) {

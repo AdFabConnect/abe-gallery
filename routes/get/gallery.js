@@ -4,9 +4,10 @@ var sizeOf = require('image-size');
 var exec = require('child_process').exec;
 var SmartImage = require('../../modules/SmartImage');
 var ImageJson = require('../../modules/ImageJson');
+var path = require('path');
 
 var route = function route(req, res, next, abe) {
-	var jsonFile = abe.fileUtils.concatPath(abe.config.root, abe.config.plugins.url, '/abe-gallery/images.json');
+	var jsonFile = path.join(abe.config.root, abe.config.plugins.url, '/abe-gallery/images.json');
   var imageList = [];
   var images = [];
   var result = [];
@@ -29,14 +30,14 @@ var route = function route(req, res, next, abe) {
 	    if(!exist) smartImage.createList(
 	      imageList,
 	      'path',
-	      abe.fileUtils.concatPath(abe.config.root, abe.config.publish.url),
-	      abe.fileUtils.concatPath(abe.config.root, abe.config.publish.url, 'thumbs'),
+	      path.join(abe.config.root, abe.config.publish.url),
+	      path.join(abe.config.root, abe.config.publish.url, 'thumbs'),
 	      200,
 	      null
 	    );
 
-    	var thumbsPath = abe.fileUtils.concatPath(abe.config.root, abe.config.publish.url, 'thumbs', req.query.fileName);
-    	var realPath = abe.fileUtils.concatPath(abe.config.root, abe.config.publish.url, req.query.fileName);
+    	var thumbsPath = path.join(abe.config.root, abe.config.publish.url, 'thumbs', req.query.fileName);
+    	var realPath = path.join(abe.config.root, abe.config.publish.url, req.query.fileName);
 		  var thumbsFolderPath = thumbsPath.split('/');
 		  thumbsFolderPath.pop();
 		  thumbsFolderPath = thumbsFolderPath.join('/');

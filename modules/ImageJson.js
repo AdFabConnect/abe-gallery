@@ -1,21 +1,21 @@
 var SmartImage = require('./SmartImage');
 var sizeOf = require('image-size');
-
+var path = require('path');
 var jsonFile = '../images.json';
 var jsonCache = [];
 
 function ImageJson (abe) {
 	this.abe = abe;
-  jsonFile = abe.fileUtils.concatPath(abe.config.root, abe.config.plugins.url, '/abe-gallery/images.json');
+  jsonFile = path.join(abe.config.root, abe.config.plugins.url, '/abe-gallery/images.json');
 };
 
 ImageJson.prototype.create = function () {
   var config = this.abe.config;
-  var imageUrl = this.abe.fileUtils.concatPath(config.root, config.publish.url, config.upload.image);
+  var imageUrl = path.join(config.root, config.publish.url, config.upload.image);
   var images = this.abe.FileParser.getFiles(imageUrl, true, 10);
   var imageList = [];
   images.forEach(function (image) {
-    var dimensions = sizeOf(this.abe.fileUtils.concatPath(config.root, config.publish.url, image.cleanFilePath));
+    var dimensions = sizeOf(path.join(config.root, config.publish.url, image.cleanFilePath));
     imageList.push({
       height: dimensions.height,
       width: dimensions.width,
@@ -28,14 +28,14 @@ ImageJson.prototype.create = function () {
   return imageList;
 };
 
-ImageJson.prototype.addImage = function (path) {
+ImageJson.prototype.addImage = function (pathImg) {
   var imageList = this.get();
-  console.log(this.abe.config.root, this.abe.config.publish.url, path);
-  var dimensions = sizeOf(this.abe.fileUtils.concatPath(this.abe.config.root, this.abe.config.publish.url, path));
+  console.log(this.abe.config.root, this.abe.config.publish.url, pathImg);
+  var dimensions = sizeOf(path.join(this.abe.config.root, this.abe.config.publish.url, pathImg));
   imageList.unshift({
     height: dimensions.height,
     width: dimensions.width,
-    path: '/' + path.replace(/^\//, '')
+    path: '/' + pathImg.replace(/^\//, '')
   });
   jsonCache = imageList;
   this.save(imageList);
@@ -47,7 +47,7 @@ ImageJson.prototype.save = function (imageList) {
 
 ImageJson.prototype.flush = function (imageList) {
   var config = this.abe.config;
-  var images = this.abe.FileParser.getFiles(this.abe.fileUtils.concatPath(config.root, config.publish.url, config.upload.image), true, 10);
+  var images = this.abe.FileParser.getFiles(path.join(config.root, config.publish.url, config.upload.image), true, 10);
   var imageList = jsonCache;
   var smartImage = new SmartImage(this.abe);
   images.forEach(function (image) {
@@ -60,15 +60,15 @@ ImageJson.prototype.flush = function (imageList) {
       }
     }
     if(!found){
-      var dimensions = sizeOf(this.abe.fileUtils.concatPath(config.root, config.publish.url, image.cleanFilePath));
+      var dimensions = sizeOf(path.join(config.root, config.publish.url, image.cleanFilePath));
       imageList.unshift({
         height: dimensions.height,
         width: dimensions.width,
         path: imgUrl
       });
       smartImage.create(
-        this.abe.fileUtils.concatPath(this.abe.config.root, this.abe.config.publish.url, imgUrl),
-        this.abe.fileUtils.concatPath(this.abe.config.root, this.abe.config.publish.url, 'thumbs', imgUrl),
+        path.join(this.abe.config.root, this.abe.config.publish.url, imgUrl),
+        path.join(this.abe.config.root, this.abe.config.publish.url, 'thumbs', imgUrl),
         200,
         null
       );
