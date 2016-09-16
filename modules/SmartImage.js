@@ -4,7 +4,7 @@ var path = require('path');
 
 function SmartImage (abe) {
 	this.abe = abe;
-	this.smartCropPath = abe.fileUtils.concatPath(abe.config.root, abe.config.plugins.url, 'abe-gallery/node_modules/smartcrop-cli/smartcrop-cli.js');
+	this.smartCropPath = path.join(abe.config.root, abe.config.plugins.url, 'abe-gallery/node_modules/smartcrop-cli/smartcrop-cli.js');
 };
 
 SmartImage.prototype.create = function (src, dist, width, height, callBack) {
@@ -21,8 +21,8 @@ SmartImage.prototype.create = function (src, dist, width, height, callBack) {
 
 SmartImage.prototype.createList = function (list, key, from, to, width, height) {
 	list.forEach(function (imageObj) {
-    var path = '/' + imageObj[key].replace(/^\//, '');
-    this.create(this.abe.fileUtils.concatPath(from, path), this.abe.fileUtils.concatPath(to, path), width, height, function (res) {
+    var pathList = '/' + imageObj[key].replace(/^\//, '');
+    this.create(path.join(from, pathList), path.join(to, pathList), width, height, function (res) {
       if(res.error) console.log("smartImage ERROR : ", res.error);
     });
   }.bind(this));

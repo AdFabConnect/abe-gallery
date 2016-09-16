@@ -3,6 +3,7 @@ var sizeOf = require('image-size');
 var fs = require('fs');
 var jsonFile = '../images.json';
 var jsonCache = [];
+var path = require('path');
 
 function ImageJson (abe) {
 	this.abe = abe;
@@ -25,7 +26,7 @@ ImageJson.prototype.create = function () {
   var imageList = [];
   images.forEach(function (image) {
     try{
-      var path = this.abe.fileUtils.concatPath(config.root, config.publish.url, image.cleanFilePath)
+      var pathCreate = path.join(config.root, config.publish.url, image.cleanFilePath)
       var dimensions = sizeOf(path);
       imageList.push({
         height: dimensions.height,
@@ -35,18 +36,18 @@ ImageJson.prototype.create = function () {
     }
     catch(e){
       try{
-        var stats = fs.statSync(path);
+        var stats = fs.statSync(pathCreate);
         //image-size doesn't like images with 0ko
         // If I find one such image, I delete it
         if(stats["size"] === 0) {
-          fs.unlinkSync(path);
+          fs.unlinkSync(pathCreate);
         } else {
           console.log(e)
-          console.log(path)
+          console.log(pathCreate)
         }
       }
       catch(err) {
-        console.log(path)
+        console.log(pathCreate)
         console.log(e)
         console.log(err)
       }
@@ -60,17 +61,17 @@ ImageJson.prototype.create = function () {
 
 ImageJson.prototype.addImage = function (pathImg) {
   var imageList = this.get();
-  var path = this.abe.fileUtils.concatPath(this.abe.config.root, this.abe.config.publish.url, path);
+  var pathAdd = path.join(this.abe.config.root, this.abe.config.publish.url, pathAdd);
 
-  if(!fileExists(path)) {
+  if(!fileExists(pathAdd)) {
     setTimeout(function () {
-      this.addImage(path);
+      this.addImage(pathAdd);
     }.bind(this), 200);
     return;
   }
   var dimensions;
   try{
-    dimensions = sizeOf(path);
+    dimensions = sizeOf(pathAdd);
   }
   catch(e){
     dimensions = {

@@ -7,7 +7,7 @@ var ImageJson = require('../../modules/ImageJson');
 var path = require('path');
 
 var route = function route(req, res, next, abe) {
-	var jsonFile = abe.fileUtils.concatPath(abe.config.root, abe.config.plugins.url, '/abe-gallerygallery/images.json');
+	var jsonFile = path.join(abe.config.root, abe.config.plugins.url, '/abe-gallerygallery/images.json');
   var imageList = [];
   var images = [];
   var result = [];

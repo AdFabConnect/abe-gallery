@@ -9,6 +9,7 @@ var imageList = [];
 var images;
 var abe;
 var keys = [];
+var path = require('path');
 
 var hooks = {
   afterVariables: function(EditorVariables, abe){
@@ -21,8 +22,8 @@ var hooks = {
       if(!exist) smartImage.createList(
         imageList,
         'path',
-        abe.fileUtils.concatPath(abe.config.root, abe.config.publish.url),
-        abe.fileUtils.concatPath(abe.config.root, abe.config.publish.url, 'thumbs'),
+        path.join(abe.config.root, abe.config.publish.url),
+        path.join(abe.config.root, abe.config.publish.url, 'thumbs'),
         200,
         null
       );
@@ -54,10 +55,10 @@ var hooks = {
               obj.json.content[p0].forEach(function (item) {
                 if(typeof item[p1] !== 'undefined' && item[p1] !== null && item[p1] !== ''){
                   keys[link][prop].forEach(function (key) {
-                    var path = item[p1].replace(/(\.(gif|jpg|jpeg|png))/, '_' + key + '$1');
+                    var pathSave = item[p1].replace(/(\.(gif|jpg|jpeg|png))/, '_' + key + '$1');
                     try{
-                      var sfStat = fs.statSync(abe.fileUtils.concatPath(abe.config.root, abe.config.publish.url, path));
-                      obj.json.content[p0][index++][p1 + '_' + key] = path;
+                      var sfStat = fs.statSync(path.join(abe.config.root, abe.config.publish.url, pathSave));
+                      obj.json.content[p0][index++][p1 + '_' + key] = pathSave;
                     }
                     catch(e){
                       delete obj.json.content[p0][index++][p1 + '_' + key];
@@ -70,10 +71,10 @@ var hooks = {
           else if((prop in obj.json.content) && obj.json.content[prop].indexOf('http://') < 0){
             var img = obj.json.content[prop].split('.');
             keys[link][prop].forEach(function (key) {
-              var path = obj.json.content[prop].replace(/(\.(gif|jpg|jpeg|png))/, '_' + key + '$1');
+              var pathSave = obj.json.content[prop].replace(/(\.(gif|jpg|jpeg|png))/, '_' + key + '$1');
               try{
-                var sfStat = fs.statSync(abe.fileUtils.concatPath(abe.config.root, abe.config.publish.url, path));
-                obj.json.content[prop + '_' + key] = path;
+                var sfStat = fs.statSync(path.join(abe.config.root, abe.config.publish.url, pathSave));
+                obj.json.content[prop + '_' + key] = pathSave;
               }
               catch(e){
                 delete obj.json.content[prop + '_' + key];
@@ -119,8 +120,8 @@ var hooks = {
         smartImage.createList(
           imageJson.create(),
           'path',
-          abe.fileUtils.concatPath(abe.config.root, abe.config.publish.url),
-          abe.fileUtils.concatPath(abe.config.root, abe.config.publish.url, 'thumbs'),
+          path.join(abe.config.root, abe.config.publish.url),
+          path.join(abe.config.root, abe.config.publish.url, 'thumbs'),
           200,
           null
         );
@@ -131,8 +132,8 @@ var hooks = {
   afterSaveImage: (resp, req, abe) => {
     var imageJson = new ImageJson(abe);
     var smartImage = new SmartImage(abe);
-    var realPath = abe.fileUtils.concatPath(abe.config.root, abe.config.publish.url, resp.filePath);
-    var thumbsPath = abe.fileUtils.concatPath(abe.config.root, abe.config.publish.url, 'thumbs', resp.filePath);
+    var realPath = path.join(abe.config.root, abe.config.publish.url, resp.filePath);
+    var thumbsPath = path.join(abe.config.root, abe.config.publish.url, 'thumbs', resp.filePath);
     var error = [];
     if(/data-size=[\"|\''](.*?)[\"|\'']/.test(req.query.input)){
       var arraySize = req.query.input.match(/data-size=[\"|\''](.*?)[\"|\'']/)[1].split(',');
