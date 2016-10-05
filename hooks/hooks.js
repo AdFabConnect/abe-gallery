@@ -31,11 +31,11 @@ var hooks = {
     return EditorVariables;
   },
   afterAbeAttributes: function afterAbeAttributes(obj, str, json, abe) {
-    if(abe.getAttr(str, 'thumbs') !== '') {
+    if(abe.cmsData.regex.getAttr(str, 'thumbs') !== '') {
       var link = json.abe_meta.link;
       if(typeof keys[link] === 'undefined' || keys[link] === null) keys[link] = [];
-      keys[link][obj.key] = abe.getAttr(str, 'thumbs').split(',');
-      obj.thumbs = abe.getAttr(str, 'thumbs');
+      keys[link][obj.key] = abe.cmsData.regex.getAttr(str, 'thumbs').split(',');
+      obj.thumbs = abe.cmsData.regex.getAttr(str, 'thumbs');
     }
     return obj;
   },
