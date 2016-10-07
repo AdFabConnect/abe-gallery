@@ -89,7 +89,7 @@ ImageJson.prototype.addImage = function (pathImg) {
 };
 
 ImageJson.prototype.save = function (imageList) {
-  this.abe.folderUtils.createFile(jsonFile, imageList);
+  this.abe.fse.writeJsonSync(jsonFile, imageList, { space: 2, encoding: 'utf-8' })
 };
 
 ImageJson.prototype.flush = function (imageList) {
