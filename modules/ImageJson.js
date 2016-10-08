@@ -22,7 +22,7 @@ function fileExists(filePath) {
 ImageJson.prototype.create = function () {
   var config = this.abe.config;
   var imageUrl = path.join(config.root, config.publish.url, config.upload.image);
-  var images = this.abe.FileParser.getFiles(imageUrl, true, 10);
+  var images = this.abe.cmsData.file.getFiles(imageUrl, true, 10);
   var imageList = [];
   images.forEach(function (image) {
     try{
@@ -94,7 +94,7 @@ ImageJson.prototype.save = function (imageList) {
 
 ImageJson.prototype.flush = function (imageList) {
   var config = this.abe.config;
-  var images = this.abe.FileParser.getFiles(path.join(config.root, config.publish.url, config.upload.image), true, 10);
+  var images = this.abe.cmsData.file.getFiles(path.join(config.root, config.publish.url, config.upload.image), true, 10);
   var imageList = jsonCache;
   var smartImage = new SmartImage(this.abe);
   images.forEach(function (image) {
@@ -133,7 +133,7 @@ ImageJson.prototype.flush = function (imageList) {
 };
 
 ImageJson.prototype.get = function () {
-  var imageList = this.abe.FileParser.getJson(jsonFile, true);
+  var imageList = this.abe.cmsData.file.get(jsonFile, true);
   if(typeof imageList !== 'undefined' && imageList !== null && JSON.stringify(imageList) !== '{}') {
     jsonCache = imageList;
     return imageList;
@@ -148,7 +148,7 @@ ImageJson.prototype.fromCache = function () {
 };
 
 ImageJson.prototype.exist = function () {
-  var imageList = this.abe.FileParser.getJson(jsonFile, true);
+  var imageList = this.abe.cmsData.file.get(jsonFile, true);
   return typeof imageList !== 'undefined' && imageList !== null && JSON.stringify(imageList) !== '{}';
 };
 
