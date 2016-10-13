@@ -3,7 +3,6 @@
 var fs = require('fs');
 var sizeOf = require('image-size');
 var SmartImage = require('../modules/SmartImage');
-var ImageJson = require('../modules/ImageJson');
 var imageList = [];
 var images;
 var abe;
@@ -11,25 +10,6 @@ var keys = [];
 var path = require('path');
 
 var hooks = {
-  afterVariables: function(EditorVariables, abe){
-    if(abe.config.gallery){
-      var imageJson = new ImageJson(abe);
-      var smartImage = new SmartImage(abe);
-      var exist = imageJson.exist();
-      var imageList = imageJson.get();
-      EditorVariables.imageList = imageList;
-      if(!exist) smartImage.createList(
-        imageList,
-        'path',
-        path.join(abe.config.root, abe.config.publish.url),
-        path.join(abe.config.root, abe.config.publish.url, 'thumbs'),
-        200,
-        null
-      );
-    }
-
-    return EditorVariables;
-  },
   afterAbeAttributes: function afterAbeAttributes(obj, str, json, abe) {
     if(abe.cmsData.regex.getAttr(str, 'thumbs') !== '') {
       var link = json.abe_meta.link;
@@ -110,26 +90,7 @@ var hooks = {
 
     return htmlString
   },
-  beforeExpress: function (port, abe) {
-    // this is too time consuming. to be refactored
-    if(abe.config.gallery){
-      var imageJson = new ImageJson(abe);
-      var smartImage = new SmartImage(abe);
-      if(!imageJson.exist()) {
-        smartImage.createList(
-          imageJson.create(),
-          'path',
-          path.join(abe.config.root, abe.config.publish.url),
-          path.join(abe.config.root, abe.config.publish.url, 'thumbs'),
-          200,
-          null
-        );
-      }
-    }
-    return port;
-  },
   afterSaveImage: (resp, req, abe) => {
-    var imageJson = new ImageJson(abe);
     var smartImage = new SmartImage(abe);
     var realPath = path.join(abe.config.root, abe.config.publish.url, resp.filePath);
     var thumbsPath = path.join(abe.config.root, abe.config.publish.url, 'thumbs', resp.filePath);
@@ -151,7 +112,6 @@ var hooks = {
     }
 
     if(error.length > 0) resp.error = error;
-    imageJson.addImage(resp.filePath);
     resp.thumbsPath = thumbsPath;
     return resp
   }
