@@ -4,7 +4,11 @@ var path = require('path');
 
 function SmartImage (abe) {
 	this.abe = abe;
-	this.smartCropPath = path.join(abe.config.root, abe.config.plugins.url, 'abe-gallery/node_modules/smartcrop-cli/smartcrop-cli.js');
+	var node_modules = __dirname.split(path.sep)
+	node_modules.pop()
+	node_modules.pop()
+	node_modules = node_modules.join(path.sep)
+	this.smartCropPath = path.join(node_modules, 'smartcrop-cli', 'smartcrop-cli.js');
 };
 
 SmartImage.prototype.create = function (src, dist, width, height, callBack) {
