@@ -1,28 +1,28 @@
-{{#if config.gallery}}
-<div class="modal fade" id="thumbnail-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h4>
-          Choose image :
-        </h4>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-      </div>
-      <div class="modal-body">
-      	<div class="image-list">{{#each @root.imageList}}<div class="image-item"><img src="/thumbs{{this.path}}"></div>{{/each}}</div>
-        <div class="modal-footer">
-          <input class="form-control" id="modal-upload" title="upload an image" type="file">
+<div class="gallery">
+	<div class="overlay close-gallery" data-init="0"></div>
+	<div class="popin-gallery">
+		
+		<div class="header">
+			Gallery
+			<span class="close-btn close-gallery" data-init="0">
+				<span class="glyphicon glyphicon-remove"></span>
+			</span>
+		</div>
 
-          <button class="btn btn-default choose active" title="select an image then click choose to use it">choose</button>
-          <button class="btn btn-default flush" title="flush image cache">flush</button>
-        </div>
-      </div>
-    </div>
-  </div>
+		<div class="body">
+			<div class="content"></div>
+		</div>
+
+		<div class="footer">
+				<div class="content-footer">
+					<div class="desc"></div>
+					<div class="image"></div>
+				</div>
+				<button class="btn-choose-img">choose</button>
+		</div>
+
+	</div>
 </div>
 
-<script src="/gallery.js"></script>
-<link rel="stylesheet" href="/gallery.css" />
-{{/if}}
-
-<script src="/json-key-reload.js"></script>
+<script src="/gallery.js" defer></script>
+<link rel="stylesheet" href="/gallery.css">
