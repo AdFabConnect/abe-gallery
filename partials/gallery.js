@@ -1,4 +1,3 @@
-
 var Gallery = function () {
 	this.initialized = false;
 	this.galleryPopup = document.querySelector('.gallery');
@@ -18,11 +17,21 @@ Gallery.prototype.init = function () {
 	this.initListener();
 };
 
-Gallery.prototype.selectThumb = function (thumb = false) {
+Gallery.prototype.resetPreview = function (thumb = false) {
 	this.galleryPopupFooter.innerHTML = '<div class="desc"></div><div class="image"></div>';
-	Array.prototype.forEach.call(this.thumbEls, function(thumbEl) {
+}
+
+Gallery.prototype.unselectThumbs = function (thumb = false) {
+	var selectedThumbs = this.galleryPopup.querySelectorAll('.thumb.selected')
+	this.selectedThumb = false;
+	Array.prototype.forEach.call(selectedThumbs, function(thumbEl) {
 		thumbEl.classList.remove('selected');
 	});
+}
+
+Gallery.prototype.selectThumb = function (thumb = false) {
+	this.resetPreview();
+	this.unselectThumbs();
 	if(thumb) thumb.classList.add('selected');
 	else return;
 	this.ajax('/abe/image/?name=' + thumb.querySelector('img').getAttribute('data-thumb'), function (resp) {
@@ -41,19 +50,68 @@ Gallery.prototype.selectThumb = function (thumb = false) {
 	}.bind(this));
 };
 
+Gallery.prototype.createThumbElement = function (thumbFileName, imgFileName) {
+	var thumbEl = document.createElement('div');
+	thumbEl.classList.add('thumb');
+	thumbEl.innerHTML = '<img src="' + thumbFileName + '" data-thumb="' + thumbFileName + '"  data-original="' + imgFileName + '" />';
+	return thumbEl;
+};
+
+Gallery.prototype.initThumbListener = function (thumbEl) {
+	thumbEl.addEventListener('click', function (e) {
+		if(thumbEl.classList.contains('selected')) this.selectThumb();
+		else this.selectThumb(thumbEl);
+	}.bind(this));
+};
+
 Gallery.prototype.initThumbs = function () {
 	Array.prototype.forEach.call(this.thumbs, function(thumb) {
-		var thumbEl = document.createElement('div');
-		thumbEl.classList.add('thumb');
-		thumbEl.innerHTML = '<img src="' + thumb.thumbFile + '" data-thumb="' + thumb.thumbFile + '"  data-original="' + thumb.originalFile + '" />'
+		var thumbEl = this.createThumbElement(thumb.thumbFile, thumb.originalFile);
 		this.galleryPopupContent.appendChild(thumbEl);
 		this.thumbEls.push(thumbEl);
-		thumbEl.addEventListener('click', function (e) {
-			if(thumbEl.classList.contains('selected')) this.selectThumb();
-			else this.selectThumb(thumbEl);
-		}.bind(this));
+		this.initThumbListener(thumbEl);
 	}.bind(this));
 	this.initialized = true;
+};
+
+Gallery.prototype.addSingleThumb = function (input) {
+	var img = input.value;
+	var thumbFileName = img.split('.');
+	var ext = thumbFileName.pop();
+	thumbFileName = thumbFileName.concat(['_thumb', '.' + ext]).join('');
+	var thumbEl = this.createThumbElement(thumbFileName, img);
+
+	var insertBeforeElement = this.thumbs[this.thumbs.length - 1].thumbFile;
+	var imageName = img.split('/');
+	imageName = imageName[imageName.length - 1];
+	var found = false;
+	Array.prototype.forEach.call(this.thumbs, function(thumb) {
+		var name = thumb.originalFile.split('/');
+		name = name[name.length - 1];
+		if (imageName > name) found = true;
+		else if(found){
+			insertBeforeElement = thumb.thumbFile;
+			found = false;
+		}
+	});
+
+	this.galleryPopupContent.insertBefore(thumbEl, this.galleryPopupContent.querySelector('img[src="' + insertBeforeElement + '"]').parentNode);
+	this.thumbEls = [thumbEl].push(this.thumbEls);
+	this.initThumbListener(thumbEl);
+};
+
+Gallery.prototype.orderThumbs = function (thumbs) {
+	thumbs.sort(function(a, b){
+		var nameA = a.originalFile.split('/');
+		nameA = nameA[nameA.length - 1];
+		var nameB = b.originalFile.split('/');
+		nameB = nameB[nameB.length - 1];
+		if (nameA < nameB) return -1;
+		if (nameA > nameB) return 1;
+		return 0;
+	});
+
+	return thumbs;
 };
 
 Gallery.prototype.initListener = function () {
@@ -66,9 +124,9 @@ Gallery.prototype.initListener = function () {
 				if(!this.initialized) {
 					if(this.thumbs) this.initThumbs();
 					else{
-						this.thumbs = this.ajax('/abe/thumbs/', function (resp) {
+						this.ajax('/abe/thumbs/', function (resp) {
 							resp = JSON.parse(resp);
-	  					if(resp.thumbs) this.thumbs = resp.thumbs;
+	  					if(resp.thumbs) this.thumbs = this.orderThumbs(resp.thumbs);
 							this.initThumbs();
 						}.bind(this));
 					}
@@ -110,29 +168,29 @@ Gallery.prototype.initListener = function () {
     this.inputSelected.blur()
     this.changeDisplayState('hide')
 	}.bind(this));
+
+	abe.files.onUpload(function(input){
+		if(this.initialized) this.addSingleThumb(input.parentNode.parentNode.querySelector('input[type="text"]'));
+	}.bind(this));
+
 };
 
 Gallery.prototype.changeDisplayState = function (state) {
 	if(state === 'show') document.body.classList.add('gallery-open');
 	else {
+		this.resetPreview();
 		document.body.classList.remove('gallery-open');
-		this.selectedThumb = false;
-		Array.prototype.forEach.call(this.thumbEls, function(thumbEl) {
-			thumbEl.classList.remove('selected');
-		});
+		this.unselectThumbs();
 	}
 };
 
 Gallery.prototype.ajax = function (req, callBack) {
 	var httpRequest = new XMLHttpRequest();
 	httpRequest.onreadystatechange = function (request) {
-	  if(httpRequest.readyState === 4 && httpRequest.status === 200) {
-	  	callBack(httpRequest.responseText);
-	  }
+	  if(httpRequest.readyState === 4 && httpRequest.status === 200) callBack(httpRequest.responseText);
 	}.bind(this);
 	httpRequest.open('GET', req);
 	httpRequest.send();
 };
 
 new Gallery().init();
-
