@@ -81,21 +81,36 @@ Gallery.prototype.addSingleThumb = function (input) {
 	thumbFileName = thumbFileName.concat(['_thumb', '.' + ext]).join('');
 	var thumbEl = this.createThumbElement(thumbFileName, img);
 
-	var insertBeforeElement = this.thumbs[this.thumbs.length - 1].thumbFile;
-	var imageName = img.split('/');
-	imageName = imageName[imageName.length - 1];
-	var found = false;
-	Array.prototype.forEach.call(this.thumbs, function(thumb) {
-		var name = thumb.originalFile.split('/');
-		name = name[name.length - 1];
-		if (imageName > name) found = true;
-		else if(found){
-			insertBeforeElement = thumb.thumbFile;
-			found = false;
+	if(this.thumbs.length > 0) {
+		var insertBeforeElement = this.thumbs[this.thumbs.length - 1].thumbFile;
+		var imageName = img.split('/');
+		imageName = imageName[imageName.length - 1];
+		var found = false;
+		var insertAtIndex = 0;
+		var count = 0;
+		Array.prototype.forEach.call(this.thumbs, function(thumb) {
+			var name = thumb.originalFile.split('/');
+			name = name[name.length - 1];
+			if (imageName > name) found = true;
+			else if(found){
+				insertAtIndex = count;
+				insertBeforeElement = thumb.thumbFile;
+				found = false;
+			}
+			count++;
+		}.bind(this));
+		if(insertBeforeElement < thumbFileName && (insertAtIndex + 1) === this.thumbs.length){
+			this.galleryPopupContent.appendChild(thumbEl);
 		}
-	});
-
-	this.galleryPopupContent.insertBefore(thumbEl, this.galleryPopupContent.querySelector('img[src="' + insertBeforeElement + '"]').parentNode);
+		else {
+			this.galleryPopupContent.insertBefore(thumbEl, this.galleryPopupContent.querySelector('img[src="' + insertBeforeElement + '"]').parentNode);
+		}
+		this.thumbs.splice((insertAtIndex + 1), 0, {originalFile: img, thumbFile: thumbFileName});
+	}
+	else {
+		this.thumbs.push({originalFile: img, thumbFile: thumbFileName});
+		this.galleryPopupContent.appendChild(thumbEl);
+	}
 	this.thumbEls = [thumbEl].push(this.thumbEls);
 	this.initThumbListener(thumbEl);
 };
