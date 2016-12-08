@@ -118,7 +118,6 @@ Gallery.prototype.orderThumbs = function (thumbs) {
 Gallery.prototype.initListener = function (onlyInitOpen) {
 	Array.prototype.forEach.call(this.btnsOpenGallery, function(btnOpenGallery) {
 		if(parseInt(btnOpenGallery.getAttribute('data-init')) === 0){
-			console.log('init', btnOpenGallery)
 			this.btnsOpenGalleryAdded.push(btnOpenGallery.querySelector('span').getAttribute('data-id'));
 			btnOpenGallery.setAttribute('data-init', 1);
 			btnOpenGallery.addEventListener('click', function (e) {
