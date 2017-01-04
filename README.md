@@ -3,7 +3,7 @@
 > plugin Abe for image management
 
 ```shell
-abe add https://github.com/AdFabConnect/abe-gallery.git
+abe install AdFabConnect/abe-gallery.git
 ```
 
 This plugin add a popin containing files uploaded via Abe and allow contributor to choose them directly from this popin so they can re-use previously uploaded image rather than upload same images again and again
