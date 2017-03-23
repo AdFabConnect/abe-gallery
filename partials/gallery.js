@@ -121,7 +121,7 @@ Gallery.prototype.initListener = function (onlyInitOpen) {
 			this.btnsOpenGalleryAdded.push(btnOpenGallery.querySelector('span').getAttribute('data-id'));
 			btnOpenGallery.setAttribute('data-init', 1);
 			btnOpenGallery.addEventListener('click', function (e) {
-				this.inputSelected = btnOpenGallery.parentNode.querySelector('[type="text"]')
+				this.inputSelected = btnOpenGallery.parentNode.parentNode.querySelector('[type="text"]')
 				this.changeDisplayState('show');
 				if(!this.initialized) {
 					if(this.thumbs) this.initThumbs();
